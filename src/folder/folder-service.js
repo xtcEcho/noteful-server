@@ -8,7 +8,7 @@ const FolderService = {
             .into('noteful_folders')
             .returning('*')
             .then(rows => {
-                return row [0]
+                return rows[0]
             })
     },
     getById(knex, id){

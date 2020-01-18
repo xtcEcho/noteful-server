@@ -24,6 +24,29 @@ NoteRouter
             })
             .catch(next)
     })
+    .post(jsonParser, (req, res, next) => {
+        const {name, modified, folderid, content} = req.body
+        const newNote = {name, modified, folderid, content}
+
+        for (const [key, value] of Object.entries(newNote)){
+            if (value == null) {
+                return res.status(400).json({
+                    error: {message: `Missing '${key} in request body`}
+                })
+            }
+        }
+
+        NoteService.insertNote(
+            req.app.get('db'),
+            newNote
+        ).then(note => {
+            res
+                .status(201)
+                .location(path.posix.join(req.originalUrl, `${note.id}`))
+                .json(note)
+        })
+        .catch(next)
+    })
     
 NoteRouter
     .route('/:note_id')
@@ -43,15 +66,28 @@ NoteRouter
             })
             .catch(next)
     })
-    .get((req, res, next) => [
+    .get((req, res, next) => {
         NoteService.getNoteById(
-            req.app.get('db')
-                .then(note => {
-                    res.json(note)
-                })
-                .catch(next)
+            req.app.get('db'),
+            req.params.note_id
+        ).then(note => {
+            res.join(note)
+        })
+        .catch(next)
+        }
+    )
+    .delete((req, res, next) => {
+        NoteService.deleteNote(
+            req.app.get('db'),
+            req.params.note_id
         )
-    ])
+        .then(() => {
+            res.status(204).end()
+        })
+        .catch(next)
+    })
+
+
     
 
 module.exports = NoteRouter
