@@ -13,13 +13,14 @@ const jsonParser = express.json()
 FolderRouter
     .route('/')
     .get((req, res, next) => {
+        console.log(req)
         FolderService.getAllFolders(
             req.app.get('db')
         )
             .then(folders => {
                 res.json(folders)
             })
-            .catch(next)
+            .catch(err => console.log('this is the error: ', err))
     })
     .post(jsonParser, (req, res, next) => {
         const { name } = req.body
